@@ -21,6 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(octomap REQUIRED)
 find_package(OpenMP REQUIRED)
 
+## Generate messages in the 'msg' folder
+
 add_action_files(
   DIRECTORY action
   FILES Navigation.action

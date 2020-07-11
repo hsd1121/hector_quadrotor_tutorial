@@ -10,6 +10,7 @@
 
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/PoseArray.h>
 #include <std_msgs/Float64.h>
 #include <nav_msgs/Odometry.h>
 #include <octomap_msgs/conversions.h>
@@ -25,7 +26,6 @@
 #include <hector_moveit_navigation/NavigationAction.h>
 
 #include <octomap/OcTree.h>
-
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -73,6 +73,7 @@ class Quadrotor{
         hector_moveit_navigation::NavigationResult result_;
 
         const double takeoff_altitude = 1.0;
+        int GRID;
         bool odom_received,trajectory_received;
         bool isPathValid;
         bool collision;
@@ -80,10 +81,13 @@ class Quadrotor{
         geometry_msgs::Pose odometry_information;
         std::vector<geometry_msgs::Pose> trajectory;
         
-        std::vector<geometry_msgs::Pose> invalid_poses;
+        std::vector<geometry_msgs::Pose> frontiers;
+        std::vector<geometry_msgs::Pose> explored;
 
         ros::Subscriber base_sub,plan_sub,goal_sub,distance_sub;
         ros::Publisher distance_pub;
+        ros::Publisher frontier_pub;
+
         ros::ServiceClient motor_enable_service; 
         ros::ServiceClient planning_scene_service;
 
@@ -101,6 +105,8 @@ class Quadrotor{
         void executeCB(const hector_moveit_navigation::NavigationGoalConstPtr &goal);
 
         void computePathLengthCB(const geometry_msgs::Point::ConstPtr &path);
+
+        void findFrontier();
     
     public:
         Quadrotor(ros::NodeHandle& nh, std::string name);

@@ -17,6 +17,7 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh, std::string name) :
     distance_sub = nh.subscribe<geometry_msgs::Point>("/compute_path/point",1,&Quadrotor::computePathLengthCB,this);
     
     distance_pub = nh.advertise<std_msgs::Float64>("/compute_path/length",1);
+    frontier_pub = nh.advertise<geometry_msgs::PoseArray>("/frontiers", 1);
 
     move_group.reset(new moveit::planning_interface::MoveGroupInterface(PLANNING_GROUP));
     robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
@@ -286,6 +287,75 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
     }
 }
 
+void Quadrotor::findFrontier()
+{
+    moveit_msgs::GetPlanningScene srv;
+    srv.request.components.components = moveit_msgs::PlanningSceneComponents::OCTOMAP;
+    ros::spinOnce();
+
+    if(planning_scene_service.call(srv)){
+        this->planning_scene->setPlanningSceneDiffMsg(srv.response.scene);
+        octomap_msgs::Octomap octomap = srv.response.scene.world.octomap.octomap;
+        octomap::OcTree* current_map = (octomap::OcTree*)octomap_msgs::msgToMap(octomap);
+        
+        geometry_msgs::PoseArray posearray;
+        double resolution = current_map->getResolution();
+        
+        std::vector<std::pair<double, geometry_msgs::Pose> > candidate_frontiers;
+        for(octomap::OcTree::leaf_iterator n = current_map->begin_leafs(current_map->getTreeDepth()); n != current_map->end_leafs(); ++n)
+        {
+            if(!current_map->isNodeOccupied(*n))
+            {
+                double x_cur = n.getX();
+                double y_cur = n.getY();
+                double z_cur = n.getZ();
+                
+                bool frontier = false;
+
+                // Check whether very close point is discovered previously
+
+                // Reject the frontiers that are located in the patches who had many frontiers already discovered.
+                
+                if(x_cur < XMIN + resolution || x_cur > XMAX - resolution
+                || y_cur < YMIN + resolution || y_cur > YMAX - resolution
+                || z_cur < ZMIN + resolution || z_cur > ZMAX - resolution) continue;
+
+                for (double x_cur_buf = x_cur - resolution; x_cur_buf < x_cur + resolution; x_cur_buf += resolution)
+                {   
+                    for (double y_cur_buf = y_cur - resolution; y_cur_buf < y_cur + resolution; y_cur_buf += resolution)
+                    {
+                        
+                        octomap::OcTreeNode *n_cur_frontier = current_map->search(x_cur_buf, y_cur_buf, z_cur);
+                        if(!n_cur_frontier)
+                        {
+                            frontier = true;
+                        }
+                    }
+                }
+                if(frontier){
+                    geometry_msgs::Pose p;
+                    p.position.x = x_cur;p.position.y = y_cur;p.position.z = z_cur;
+                    p.orientation.w = 1;
+                    double dist = sqrt(pow(p.position.x - odometry_information.position.x,2) + pow(p.position.y - odometry_information.position.y,2) + pow(p.position.z - odometry_information.position.z,2));
+                    if(dist > 2)
+                        candidate_frontiers.push_back({dist,p});
+                }
+            }
+        }
+
+        std::vector<int> indices(candidate_frontiers.size());
+        for(int i=0;i<indices.size();i++)
+            posearray.poses.push_back(candidate_frontiers[i].second);
+        if(indices.size() > 0)
+        {
+            posearray.header.stamp = ros::Time::now();
+            frontier_pub.publish(posearray);
+        }
+    }
+
+
+}
+
 void Quadrotor::enableMotors()
 {
     hector_uav_msgs::EnableMotors srv;
@@ -304,9 +374,12 @@ void Quadrotor::enableMotors()
 void Quadrotor::run()
 {
     ros::Rate rate(2);
+    int count = 1;
     while(ros::ok()){
         while(!odom_received)
             rate.sleep();
+        this->findFrontier();
+
         ros::spinOnce();
         rate.sleep();
     }
