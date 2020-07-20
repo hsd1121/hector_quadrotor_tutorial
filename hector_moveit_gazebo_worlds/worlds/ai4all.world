@@ -1,0 +1,128 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="default">
+    <gui>
+      <camera name="developer_camera">
+        <pose>0 0 40 0 1.570796 1.570796</pose>
+      </camera>
+    </gui>
+    <scene>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+    </scene>
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name="asphalt_plane_0">
+        <include>
+         <uri>model://asphalt_plane</uri>
+        </include>
+        <pose frame="">0 0 0 0 0 0</pose>
+    </model>
+
+    <model name="asphalt_plane_1">
+        <include>
+         <uri>model://asphalt_plane</uri>
+        </include>
+        <pose frame="">-20 0 0 0 0 0</pose>
+    </model>
+
+    <model name="person_walking_0">
+        <include>
+         <uri>model://person_walking</uri>
+        </include>
+        <pose frame="">-3 3 0 0 0 0.4</pose>
+    </model>
+
+    <model name="person_walking_1">
+        <include>
+         <uri>model://person_walking</uri>
+        </include>
+        <pose frame="">7 0 0 0 0 1.2</pose>
+    </model>
+
+    <model name="person_walking_2">
+        <include>
+         <uri>model://person_walking</uri>
+        </include>
+        <pose frame="">-15 -6 0 0 0 0</pose>
+    </model>
+
+    <model name="person_standing_0">
+        <include>
+         <uri>model://person_standing</uri>
+        </include>
+        <pose frame="">-12 3 0 0 0 0.4</pose>
+    </model>
+
+    <model name="person_standing_1">
+        <include>
+         <uri>model://person_standing</uri>
+        </include>
+        <pose frame="">4 -5 0 0 0 0.4</pose>
+    </model>
+
+    <model name="person_standing_2">
+        <include>
+         <uri>model://person_standing</uri>
+        </include>
+        <pose frame="">-26.5 -7 0 0 0 0.4</pose>
+    </model>
+
+    <model name="pickup_0">
+        <include>
+         <uri>model://pickup</uri>
+        </include>
+        <pose frame="">-26.5 8 0 0 0 0</pose>
+    </model>
+
+    <model name="polaris_ranger_ev_0">
+        <include>
+         <uri>model://polaris_ranger_ev</uri>
+        </include>
+        <pose frame="">8.5 -8 0 0 0 1.57</pose>
+    </model>
+
+    <model name="construction_cone_0">
+        <include>
+         <uri>model://construction_cone</uri>
+        </include>
+        <pose frame="">6.5 -9 0 0 0 1.57</pose>
+    </model>
+
+    <model name="construction_cone_1">
+        <include>
+         <uri>model://construction_cone</uri>
+        </include>
+        <pose frame="">-29.5 -9 0 0 0 1.57</pose>
+    </model>
+
+    <model name="construction_cone_2">
+        <include>
+         <uri>model://construction_cone</uri>
+        </include>
+        <pose frame="">0 -9 0 0 0 1.57</pose>
+    </model>
+
+    <model name="construction_cone_3">
+        <include>
+         <uri>model://construction_cone</uri>
+        </include>
+        <pose frame="">-5 9 0 0 0 1.57</pose>
+    </model>
+
+    <model name="nist_stairs_120_0">
+        <include>
+         <uri>model://nist_stairs_120</uri>
+        </include>
+        <pose frame="">-12 9.5 0 0 0 1.57</pose>
+    </model>
+
+
+  </world>
+</sdf>

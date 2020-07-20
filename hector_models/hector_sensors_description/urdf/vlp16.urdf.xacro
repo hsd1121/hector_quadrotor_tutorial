@@ -41,7 +41,7 @@
     </xacro:macro>
     
     <xacro:macro name="vlp16" params="name parent *origin ros_topic">
-      <xacro:vlp16_advanced_parameters name="${name}" parent="${parent}" ros_topic="${ros_topic}" update_rate="10" horizontal_samples="512" vertical_samples="8" min_range="0.45" max_range="100">
+      <xacro:vlp16_advanced_parameters name="${name}" parent="${parent}" ros_topic="${ros_topic}" update_rate="10" horizontal_samples="512" vertical_samples="8" min_range="0.9" max_range="100">
         <xacro:insert_block name="origin" />
       </xacro:vlp16_advanced_parameters>    
     </xacro:macro>

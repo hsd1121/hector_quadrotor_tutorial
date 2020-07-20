@@ -61,8 +61,8 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     
     this->collision = false;
-    ROS_INFO("Try to start from [%lf,%lf,%lf]",odometry_information.position.x,odometry_information.position.y,odometry_information.position.z);
-    ROS_INFO("Try to go to [%lf,%lf,%lf]",goal->goal_pose.position.x,goal->goal_pose.position.y,goal->goal_pose.position.z);
+    ROS_INFO("Try to start from [%lf,%lf,%lf] with orienation [%lf, %lf, %lf, %lf]",odometry_information.position.x,odometry_information.position.y,odometry_information.position.z,odometry_information.orientation.x,odometry_information.orientation.y,odometry_information.orientation.z,odometry_information.orientation.w);
+    ROS_INFO("Try to go to [%lf,%lf,%lf] with orienation [%lf, %lf, %lf, %lf]",goal->goal_pose.position.x,goal->goal_pose.position.y,goal->goal_pose.position.z,goal->goal_pose.orientation.x,goal->goal_pose.orientation.y,goal->goal_pose.orientation.z,goal->goal_pose.orientation.w);
     this->start_state->setVariablePositions(start_state_);
     this->move_group->setStartState(*start_state);
 
@@ -300,46 +300,68 @@ void Quadrotor::findFrontier()
         
         geometry_msgs::PoseArray posearray;
         double resolution = current_map->getResolution();
-        
+
         std::vector<std::pair<double, geometry_msgs::Pose> > candidate_frontiers;
         for(octomap::OcTree::leaf_iterator n = current_map->begin_leafs(current_map->getTreeDepth()); n != current_map->end_leafs(); ++n)
         {
-            if(!current_map->isNodeOccupied(*n))
+          //  ROS_INFO("Node size: %f", n.getSize());
+
+            double x_cur = n.getX();
+            double y_cur = n.getY();
+            double z_cur = n.getZ();
+            if(x_cur > XMIN && x_cur < XMAX && 
+               y_cur > YMIN && y_cur < YMAX && 
+               z_cur > ZMIN && z_cur < ZMAX)
             {
-                double x_cur = n.getX();
-                double y_cur = n.getY();
-                double z_cur = n.getZ();
                 
-                bool frontier = false;
-
-                // Check whether very close point is discovered previously
-
-                // Reject the frontiers that are located in the patches who had many frontiers already discovered.
-                
-                if(x_cur < XMIN + resolution || x_cur > XMAX - resolution
-                || y_cur < YMIN + resolution || y_cur > YMAX - resolution
-                || z_cur < ZMIN + resolution || z_cur > ZMAX - resolution) continue;
-
-                for (double x_cur_buf = x_cur - resolution; x_cur_buf < x_cur + resolution; x_cur_buf += resolution)
-                {   
-                    for (double y_cur_buf = y_cur - resolution; y_cur_buf < y_cur + resolution; y_cur_buf += resolution)
+                if(!current_map->isNodeOccupied(*n))
+                {
+                    octomap::OcTreeKey key = n.getKey();
+                    octomap::OcTreeKey neighborkey;
+                    for(int i = 0; i < 4; i++)
                     {
-                        
-                        octomap::OcTreeNode *n_cur_frontier = current_map->search(x_cur_buf, y_cur_buf, z_cur);
-                        if(!n_cur_frontier)
+                        neighborkey = key;
+                        switch(i)
                         {
-                            frontier = true;
+                            case 0:
+                                neighborkey[0] += 1;
+                                break;
+                            case 1:
+                                neighborkey[0] -= 1;
+                                break;
+                            case 2:
+                                neighborkey[1] += 1;
+                                break;
+                            case 3:
+                                neighborkey[1] -= 1;
+                                break;
+                            default:
+                                ROS_INFO("Error: Got to default in switch neighbor check");
+                                break;
+                        }
+                        octomap::OcTreeNode* result = current_map->search(neighborkey);
+                        if(result == NULL)
+                        {
+                            geometry_msgs::Pose p;
+                            p.position.x = x_cur;
+                            p.position.y = y_cur;
+                            p.position.z = z_cur;
+                            p.orientation.x = odometry_information.orientation.x;
+                            p.orientation.y = odometry_information.orientation.y;
+                            p.orientation.z = odometry_information.orientation.z;
+                            p.orientation.w = odometry_information.orientation.w;
+
+                            double dist = sqrt(pow(p.position.x - odometry_information.position.x,2) + pow(p.position.y - odometry_information.position.y,2) + pow(p.position.z - odometry_information.position.z,2));
+                            if(dist > 2)
+                                candidate_frontiers.push_back({dist,p});
+
+                            continue;
                         }
                     }
+                    
+                    
                 }
-                if(frontier){
-                    geometry_msgs::Pose p;
-                    p.position.x = x_cur;p.position.y = y_cur;p.position.z = z_cur;
-                    p.orientation.w = 1;
-                    double dist = sqrt(pow(p.position.x - odometry_information.position.x,2) + pow(p.position.y - odometry_information.position.y,2) + pow(p.position.z - odometry_information.position.z,2));
-                    if(dist > 2)
-                        candidate_frontiers.push_back({dist,p});
-                }
+                
             }
         }
 
