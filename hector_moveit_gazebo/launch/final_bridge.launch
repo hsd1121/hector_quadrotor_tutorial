@@ -5,7 +5,7 @@
   <arg name="use_ground_truth_for_tf" default="true"/>
   <arg name="headless" default="true"/>
   <arg name="use_gui" default="true"/>
-  <arg name="debug" default="true" />
+  <arg name="debug" default="false" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find hector_moveit_gazebo_worlds)/worlds/final_bridge.world"/>
