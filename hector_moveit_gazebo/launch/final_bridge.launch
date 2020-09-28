@@ -5,17 +5,17 @@
   <arg name="use_ground_truth_for_tf" default="true"/>
   <arg name="headless" default="true"/>
   <arg name="use_gui" default="true"/>
-  <arg name="debug" default="false" />
+  <arg name="debug" default="true" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find hector_moveit_gazebo_worlds)/worlds/final_bridge.world"/>
-    <arg name="debug" value="false" /> 
+    <arg name="world_name" value="$(find hector_moveit_gazebo_worlds)/worlds/final_bridge_empty.world"/>
+    <arg name="debug" value="false" />
     <arg name="paused" value="false"/>
     <arg name="headless" value="$(arg headless)"/>
     <arg name="gui" value="$(arg use_gui)"/>
   </include>
-                
-    <include file="$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor_with_velodyne.launch">    
+
+    <include file="$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor_with_velodyne.launch">
       <arg name="use_ground_truth_for_tf" value="$(arg use_ground_truth_for_tf)" />
       <arg name="x" value="0" />
       <arg name="yaw" value="3.14"/>
@@ -25,9 +25,7 @@
   <arg name="robot_description" default="robot_description"/>
 
 
-
   <!-- We do not have a robot connected, so publish fake joint states -->
-  
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
   	<param name="use_gui" value="false"/>
     <param name="publish_frequency" type="double" value="50.0" />
@@ -35,7 +33,7 @@
   </node>
 
 
-  
+
   <include file="$(find hector_moveit_config)/launch/move_group.launch">
     <arg name="allow_trajectory_execution" value="true"/>
     <arg name="fake_execution" value="true"/>
@@ -44,8 +42,8 @@
   </include>
 
   <!-- Adjust grid size to have more granular exploration-->
-  <param name="grid_size" type="double" value="13"/> 
+  <param name="grid_size" type="double" value="13"/>
   <!-- Visualisation RVIZ -->
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find hector_moveit_config)/launch/moveit.rviz" output="screen"/>
-  
+
 </launch>

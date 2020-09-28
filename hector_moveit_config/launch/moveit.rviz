@@ -4,12 +4,10 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /MotionPlanning1
         - /MotionPlanning1/Planning Request1
         - /MotionPlanning1/Planned Path1
-        - /Image1
-      Splitter Ratio: 0.742560029
-    Tree Height: 583
+      Splitter Ratio: 0.7425600290298462
+    Tree Height: 398
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -19,6 +17,8 @@ Panels:
     Splitter Ratio: 0.5
   - Class: hector_moveit_rviz_plugins/OrchardGrid
     Name: OrchardGrid
+Preferences:
+  PromptSaveOnExit: true
 Toolbars:
   toolButtonStyle: 2
 Visualization Manager:
@@ -30,7 +30,7 @@ Visualization Manager:
       Color: 160; 160; 164
       Enabled: true
       Line Style:
-        Line Width: 0.0299999993
+        Line Width: 0.029999999329447746
         Value: Lines
       Name: Grid
       Normal Cell Count: 0
@@ -53,6 +53,7 @@ Visualization Manager:
       MoveIt_Goal_Tolerance: 0
       MoveIt_Planning_Attempts: 10
       MoveIt_Planning_Time: 5
+      MoveIt_Use_Cartesian_Path: false
       MoveIt_Use_Constraint_Aware_IK: true
       MoveIt_Warehouse_Host: 127.0.0.1
       MoveIt_Warehouse_Port: 33829
@@ -80,6 +81,14 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          bottom_cam_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          bottom_cam_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           camera_depth_frame:
             Alpha: 1
             Show Axes: false
@@ -129,7 +138,7 @@ Visualization Manager:
         Show Manipulability: false
         Show Manipulability Index: false
         Show Weight Limit: false
-        TextHeight: 0.0799999982
+        TextHeight: 0.07999999821186066
       Planning Request:
         Colliding Link Color: 255; 0; 0
         Goal State Alpha: 1
@@ -145,9 +154,9 @@ Visualization Manager:
       Planning Scene Topic: move_group/monitored_planning_scene
       Robot Description: robot_description
       Scene Geometry:
-        Scene Alpha: 0.899999976
+        Scene Alpha: 0.8999999761581421
         Scene Color: 50; 230; 50
-        Scene Display Time: 0.200000003
+        Scene Display Time: 0.20000000298023224
         Show Scene Geometry: true
         Voxel Coloring: Z-Axis
         Voxel Rendering: Occupied Voxels
@@ -164,6 +173,14 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          bottom_cam_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          bottom_cam_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           camera_depth_frame:
             Alpha: 1
             Show Axes: false
@@ -231,30 +248,30 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 25.991478
+      Distance: 25.991477966308594
       Enable Stereo Rendering:
-        Stereo Eye Separation: 0.0599999987
+        Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.61192322
-        Y: -2.83447957
-        Z: 2.23518001e-07
+        X: 1.6119232177734375
+        Y: -2.834479570388794
+        Z: 2.2351800055275817e-7
       Focal Shape Fixed Size: true
-      Focal Shape Size: 0.0500000007
+      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
-      Near Clip Distance: 0.00999999978
-      Pitch: 1.56979632
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 1.5697963237762451
       Target Frame: base_link
       Value: XYOrbit (rviz)
-      Yaw: 5.5031333
+      Yaw: 5.503133296966553
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1388
+  Height: 1025
   Help:
     collapsed: false
   Hide Left Dock: false
@@ -267,9 +284,9 @@ Window Geometry:
     collapsed: false
   OrchardGrid:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002ad00000526fc020000000efb0000000a0049006d0061006700650100000028000002980000001600fffffffb00000016004f007200630068006100720064004700720069006400000001780000028e0000007300fffffffb0000001200540065006c0065006d0065007400720079000000011b0000020a0000000000000000fb000000100044006900730070006c00610079007301000002c600000288000000d700fffffffb0000000800480065006c00700000000342000000bb0000007300fffffffb0000000a0056006900650077007300000003b0000000b0000000ad00fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000307000000fb0000004a00fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006700000001ce000002340000018300fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000002590000018c0000000000000000fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000002760000018c0000000000000000fb000000280020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000000000000000fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000002760000018c00000000000000000000022d0000052600000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000010000000000000181000003a7fc020000000efb0000000a0049006d006100670065010000003d000001d60000001600fffffffb00000016004f007200630068006100720064004700720069006400000001780000028e0000006e00fffffffb0000001200540065006c0065006d0065007400720079000000011b0000020a0000000000000000fb000000100044006900730070006c0061007900730100000219000001cb000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a0056006900650077007300000003b0000000b0000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000307000000fb0000004100fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006700000001ce000002340000018900fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000002590000018c0000000000000000fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000002760000018c0000000000000000fb000000280020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000000000000000fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000002760000018c0000000000000000000005b6000003a700000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
-  Width: 1248
-  X: 1312
-  Y: 24
+  Width: 1853
+  X: 67
+  Y: 27

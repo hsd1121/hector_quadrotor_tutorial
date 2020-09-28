@@ -73,14 +73,14 @@
         <visual name='visual'>
           <geometry>
             <mesh>
-              <uri>file:///home/naik/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
+              <uri>file:///home/klyu/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
             </mesh>
           </geometry>
         </visual>
         <collision name='collision'>
           <geometry>
             <mesh>
-              <uri>file:///home/naik/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
+              <uri>file:///home/klyu/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
             </mesh>
           </geometry>
           <max_contacts>10</max_contacts>

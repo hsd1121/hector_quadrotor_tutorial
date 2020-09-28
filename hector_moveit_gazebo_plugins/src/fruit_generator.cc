@@ -20,11 +20,12 @@ namespace gazebo
         home.append("/.gazebo/models/oak_tree/meshes/oak_tree.dae"); // Assume all trees are oak trees.
         common::Mesh* mesh = loader.Load(home);
         std::vector<ignition::math::Vector3d> tree_origins;
-        auto models = _parent->GetModels();
+        auto models = _parent->Models();
+
         for(auto m : models){
             std::string model_name = m->GetName();
             if(model_name.find("tree")!=std::string::npos)//It is a tree then
-                tree_origins.push_back(ignition::math::Vector3<double /* var type */ >(m->GetWorldPose().pos.x, m->GetWorldPose().pos.y, m->GetWorldPose().pos.z));
+                tree_origins.push_back(m->WorldPose().Pos());
         }
 
         float* vertices;
@@ -41,7 +42,7 @@ namespace gazebo
         std::string model_xml = buf.str();
         sdf::SDF appleSDF;
         appleSDF.SetFromString(model_xml);
-        
+
         std::vector<std::vector<float> > positions;
         for(int i=0;i<mesh->GetVertexCount()*3;i+=3){
             double planar_distance = sqrt(pow(vertices[i],2) + pow(vertices[i+1],2));
@@ -80,7 +81,7 @@ namespace gazebo
         free(indices);
     }
 
-    
+
   };
 
   // Register this plugin with the simulator
