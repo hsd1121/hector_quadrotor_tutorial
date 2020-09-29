@@ -22,6 +22,14 @@
 
 #include <octomap/OcTree.h>
 
+#include <pcl/point_cloud.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/octree/octree_search.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/filters/passthrough.h>
 
 #define _USE_MATH_DEFINES
 #include <cmath>
