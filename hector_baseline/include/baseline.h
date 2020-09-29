@@ -22,7 +22,7 @@
 
 #include <octomap/OcTree.h>
 
-// #include <pcl/point_cloud.h>
+#include <pcl/point_cloud.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/octree/octree_search.h>
 #include <pcl/io/pcd_io.h>

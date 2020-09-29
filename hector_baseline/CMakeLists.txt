@@ -3,11 +3,26 @@ project(hector_baseline)
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 
-find_package(catkin REQUIRED COMPONENTS 
-    roscpp 
-    moveit_core 
-    moveit_ros_planning_interface 
-    std_msgs 
+set(PACKAGE_DEPENDENCIES
+  roscpp
+  visualization_msgs
+  sensor_msgs
+  pcl_ros
+  pcl_conversions
+  nav_msgs
+  std_msgs
+  std_srvs
+  octomap_ros
+  octomap_msgs
+  dynamic_reconfigure
+  nodelet
+)
+
+find_package(catkin REQUIRED COMPONENTS
+    roscpp
+    moveit_core
+    moveit_ros_planning_interface
+    std_msgs
     hector_uav_msgs
     hector_moveit_actions
     actionlib
