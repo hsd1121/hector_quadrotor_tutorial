@@ -11,6 +11,9 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
     patches.resize(GRID,std::vector<int>(GRID,0));
     base_sub = nh.subscribe<nav_msgs::Odometry>("/ground_truth/state",10,&Quadrotor::poseCallback,this);
     plan_sub = nh.subscribe<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path",1,&Quadrotor::planCallback,this);
+    zFilter_sub = nh.subscribe<pcl::PointCloud<pcl::PointXZ>>("/zFiltered",1,zFiltered_cb);
+    visitedPoint_sub = nh.subscribe("/visited_point_list",1,visitedPointList_cb);
+    // TODO:define subscriber
 
     gui_ack = nh.advertise<geometry_msgs::Point>("/orchard_grid_filler",10);
     rate_ack = nh.advertise<std_msgs::Float64>("/orchard_exploration_rate",1);
@@ -28,6 +31,20 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
     start_state.reset(new robot_state::RobotState(move_group->getRobotModel()));
     planning_scene.reset(new planning_scene::PlanningScene(kmodel));
 
+}
+//TODO: create subscriber function
+void Quardrotor::zFiltered_cb(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr&msg){
+  tempCloudOccTrimmed->clear();
+  BOOST_FOREACH(const pcl::PointXYZ& pt, msg->points){
+    tempCloudOccTrimmed->points.push_back(pcl::PointXYZ(pt.x,pt.y,pt.z));
+  }
+}
+
+void Quadrotor::visitedPointList_cb(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg){
+  visitedPointsList->clear();
+    BOOST_FOREACH(const pcl::PointXYZ& pt, msg->points){
+      visitedPointsList->points.push_back(pcl::PointXYZ(pt.x,pt.y,pt.z));
+    }
 }
 
 void Quadrotor::poseCallback(const nav_msgs::Odometry::ConstPtr & msg)
@@ -308,7 +325,7 @@ void Quadrotor::takeoff()
     ROS_INFO("Takeoff successful");
 }
 
-void Quadrotor::run()
+void Quadrotor::run() //TODO:add code here to keep track of inspected voxels
 {
     ros::Rate rate(2);
     while(ros::ok()){

@@ -38,7 +38,7 @@
 typedef std::pair<double,geometry_msgs::Pose> DistancedPoint;
 
 class Compare{
-    public: 
+    public:
         bool operator()(DistancedPoint& lhs, DistancedPoint & rhs)
         {
             return lhs.first < rhs.first;
@@ -69,21 +69,29 @@ class Quadrotor{
 
         geometry_msgs::Pose odometry_information;
         std::vector<geometry_msgs::Pose> trajectory;
-        
+
         std::vector<geometry_msgs::Pose> invalid_poses;
         std::vector<std::vector<int> > patches;
         std::queue<DistancedPoint> frontiers;
         std::vector<geometry_msgs::Pose> explored;
 
-        ros::Subscriber base_sub,plan_sub;
+        pcl::PointCloud<pcl::PointXYZ>::Ptr tempCloudOccTrimmed (new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr visitedPointsList (new pcl::PointCloud<pcl::PointXYZ>);
+
+
+        ros::Subscriber base_sub,plan_sub,zFilter_sub,visitedPoint_sub; //TODO: add subscribers here
         ros::Publisher gui_ack,rate_ack;
-        ros::ServiceClient motor_enable_service; 
+        ros::ServiceClient motor_enable_service;
         ros::ServiceClient planning_scene_service;
 
         moveit_msgs::RobotState plan_start_state;
         moveit_msgs::RobotTrajectory plan_trajectory;
-    
+
         const std::string PLANNING_GROUP = "DroneBody";
+
+        void zFiltered_cb(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr&msg); //TODO: add subscriber functions here
+
+        void visitedPointList_cb(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg);
 
         void poseCallback(const nav_msgs::Odometry::ConstPtr & msg);
 
@@ -97,10 +105,10 @@ class Quadrotor{
         void findFrontier();
 
         bool go(geometry_msgs::Pose& target_);
-    
+
     public:
         Quadrotor(ros::NodeHandle& nh);
         void takeoff();
         void run();
-        
+
 };
