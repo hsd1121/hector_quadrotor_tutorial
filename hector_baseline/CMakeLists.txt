@@ -40,8 +40,6 @@ endif()
 
 include_directories(include ${OCTOMAP_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-
-
 add_executable(hector_baseline src/Explorer.cpp src/explorer_node.cpp)
 target_compile_options(hector_baseline PRIVATE ${OpenMP_FLAGS} ${CMAKE_CXX_FLAGS})
 target_link_libraries(hector_baseline ${OCTOMAP_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenMP_LIBS})
