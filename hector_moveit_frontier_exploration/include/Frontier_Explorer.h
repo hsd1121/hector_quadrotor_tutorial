@@ -22,7 +22,6 @@
 
 #include <octomap/OcTree.h>
 
-
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <queue>
@@ -47,6 +46,7 @@ class Compare{
 typedef std::priority_queue<DistancedPoint,std::vector<DistancedPoint>, Compare> DistancedPointPriorityQueue;
 
 #include <iostream>
+#include <fstream>
 #include <chrono>
 
 using namespace std;
@@ -97,6 +97,12 @@ class Quadrotor{
         void findFrontier();
 
         bool go(geometry_msgs::Pose& target_);
+
+        int total_frontiers;
+
+        std::ofstream myfile;
+
+        std::chrono::steady_clock::time_point begin,end;
 
     public:
         Quadrotor(ros::NodeHandle& nh);

@@ -27,7 +27,9 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
     
     start_state.reset(new robot_state::RobotState(move_group->getRobotModel()));
     planning_scene.reset(new planning_scene::PlanningScene(kmodel));
-    
+ 
+    total_frontiers = 0;
+    std::remove("/home/klyu/bridgeInspection/frontier_exploration_computation_time.csv");   
 }
 
 void Quadrotor::poseCallback(const nav_msgs::Odometry::ConstPtr & msg)
@@ -133,6 +135,9 @@ double Quadrotor::countFreeVolume(const octomap::OcTree *octree) {
 void Quadrotor::findFrontier()
 {
     ROS_INFO("Looking for frontiers");
+    this->myfile.open("/home/klyu/bridgeInspection/exploration_computation_time.csv", std::ofstream::out | std::ofstream::app);
+
+    this->begin = std::chrono::steady_clock::now();
     moveit_msgs::GetPlanningScene srv;
     srv.request.components.components = moveit_msgs::PlanningSceneComponents::OCTOMAP;
     ros::spinOnce();
@@ -220,6 +225,10 @@ void Quadrotor::findFrontier()
         for(int i=0;i<indices.size();i++)
             frontiers.push(candidate_frontiers[i]);
     }
+    this->end = std::chrono::steady_clock::now();
+    this->total_frontiers += frontiers.size();
+    this->myfile << std::chrono::duration_cast<std::chrono::microseconds>(this->end - this->begin).count() << "," << this->total_frontiers << std::endl;
+    this->myfile.close();
 }
 
 bool Quadrotor::go(geometry_msgs::Pose& target_)
