@@ -31,7 +31,7 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
     total_frontiers = 0;
     comp_time.sec = 0;
     comp_time.nsec = 0;
-    myfile("exploration_computation_time.csv");
+    myfile.open("exploration_computation_time.csv");
 }
 
 void Quadrotor::poseCallback(const nav_msgs::Odometry::ConstPtr & msg)
