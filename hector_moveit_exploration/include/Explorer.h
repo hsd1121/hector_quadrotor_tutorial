@@ -103,7 +103,7 @@ class Quadrotor{
         std::ofstream myfile;
 
         ros::Time before, after;
-        ros::Duration comp_time;
+        ros::Duration comp_time, temp_comp_time;
 
     public:
         Quadrotor(ros::NodeHandle& nh);
