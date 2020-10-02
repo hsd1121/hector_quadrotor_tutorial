@@ -22,6 +22,7 @@
 
 #include <octomap/OcTree.h>
 #include <fstream>
+#include <chrono>
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -102,8 +103,7 @@ class Quadrotor{
 
         std::ofstream myfile;
 
-        ros::Time before, after;
-        ros::Duration comp_time, temp_comp_time;
+        std::chrono::steady_clock::time_point begin,end;
 
     public:
         Quadrotor(ros::NodeHandle& nh);
