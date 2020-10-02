@@ -31,7 +31,7 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
     total_frontiers = 0;
     comp_time.sec = 0;
     comp_time.nsec = 0;
-    myfile.open("exploration_computation_time.csv");
+    std::remove("exploration_computation_time.csv");
 }
 
 void Quadrotor::poseCallback(const nav_msgs::Odometry::ConstPtr & msg)
@@ -137,6 +137,8 @@ double Quadrotor::countFreeVolume(const octomap::OcTree *octree) {
 void Quadrotor::findFrontier()
 {
     ROS_INFO("Looking for frontiers");
+    myfile.open("exploration_computation_time.csv", std::ofstream::out | std::ofstream::app);
+
     before = ros::Time::now();
     moveit_msgs::GetPlanningScene srv;
     srv.request.components.components = moveit_msgs::PlanningSceneComponents::OCTOMAP;
@@ -222,6 +224,7 @@ void Quadrotor::findFrontier()
     comp_time.nsec += temp_comp_time.nsec;
     total_frontiers += frontiers.size();
     myfile << comp_time.sec << "," << comp_time.nsec << "," << total_frontiers << std::endl;
+    myfile.close();
 
 }
 
