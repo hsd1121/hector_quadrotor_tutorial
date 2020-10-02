@@ -26,19 +26,19 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <queue>
-#define XMIN -24.5
-#define XMAX 24.5
-#define YMIN -16
-#define YMAX 16
+#define XMIN -18
+#define XMAX 20
+#define YMIN -7
+#define YMAX 17
 #define ZMIN 0.2
-#define ZMAX 8.0
+#define ZMAX 10.0
 
 #define EPSILON 1e-4
 
 typedef std::pair<double,geometry_msgs::Pose> DistancedPoint;
 
 class Compare{
-    public: 
+    public:
         bool operator()(DistancedPoint& lhs, DistancedPoint & rhs)
         {
             return lhs.first < rhs.first;
@@ -69,7 +69,7 @@ class Quadrotor{
 
         geometry_msgs::Pose odometry_information;
         std::vector<geometry_msgs::Pose> trajectory;
-        
+
         std::vector<geometry_msgs::Pose> invalid_poses;
         std::vector<std::vector<int> > patches;
         std::queue<DistancedPoint> frontiers;
@@ -77,12 +77,12 @@ class Quadrotor{
 
         ros::Subscriber base_sub,plan_sub;
         ros::Publisher gui_ack,rate_ack;
-        ros::ServiceClient motor_enable_service; 
+        ros::ServiceClient motor_enable_service;
         ros::ServiceClient planning_scene_service;
 
         moveit_msgs::RobotState plan_start_state;
         moveit_msgs::RobotTrajectory plan_trajectory;
-    
+
         const std::string PLANNING_GROUP = "DroneBody";
 
         void poseCallback(const nav_msgs::Odometry::ConstPtr & msg);
@@ -97,10 +97,10 @@ class Quadrotor{
         void findFrontier();
 
         bool go(geometry_msgs::Pose& target_);
-    
+
     public:
         Quadrotor(ros::NodeHandle& nh);
         void takeoff();
         void run();
-        
+
 };
