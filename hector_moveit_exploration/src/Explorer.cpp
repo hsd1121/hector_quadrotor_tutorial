@@ -219,7 +219,7 @@ void Quadrotor::findFrontier()
     after = ros::Time::now();
     comp_time = comp_time + after - before;
     total_frontiers += frontiers.size();
-    myFile << comp_time.sec << "," << comp_time.nsec << "," << total_frontiers << std::endl;
+    myfile << comp_time.sec << "," << comp_time.nsec << "," << total_frontiers << std::endl;
 
 }
 
