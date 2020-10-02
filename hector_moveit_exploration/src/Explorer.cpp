@@ -17,21 +17,21 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
     move_group.reset(new moveit::planning_interface::MoveGroupInterface(PLANNING_GROUP));
     robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
     robot_model::RobotModelPtr kmodel = robot_model_loader.getModel();
-    
+
     motor_enable_service = nh.serviceClient<hector_uav_msgs::EnableMotors>("/enable_motors");
     planning_scene_service = nh.serviceClient<moveit_msgs::GetPlanningScene>("/get_planning_scene");
 
     move_group->setPlannerId("RRTConnectkConfigDefault");
     move_group->setNumPlanningAttempts(10);
     move_group->setWorkspace(XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX);
-    
+
     start_state.reset(new robot_state::RobotState(move_group->getRobotModel()));
     planning_scene.reset(new planning_scene::PlanningScene(kmodel));
-    
+
     total_frontiers = 0;
     comp_time.sec = 0;
     comp_time.nsec = 0;
-    std::remove("exploration_computation_time.csv");
+    std::remove("/home/klyu/bridgeInspection/exploration_computation_time.csv");
 }
 
 void Quadrotor::poseCallback(const nav_msgs::Odometry::ConstPtr & msg)
@@ -70,7 +70,7 @@ void Quadrotor::collisionCallback(const hector_moveit_actions::ExecuteDroneTraje
         this->planning_scene->setPlanningSceneDiffMsg(srv.response.scene);
         octomap_msgs::Octomap octomap = srv.response.scene.world.octomap.octomap;
         octomap::OcTree* current_map = (octomap::OcTree*)octomap_msgs::msgToMap(octomap);
-        
+
         double resolution = current_map->getResolution();
         int unknown = 0, known = 0;
         for(double ix=XMIN;ix<XMAX;ix+=resolution){
@@ -88,7 +88,7 @@ void Quadrotor::collisionCallback(const hector_moveit_actions::ExecuteDroneTraje
         msg.data = rate;
         rate_ack.publish(msg);
         //ROS_INFO("Coverage of Orchard Volume: %lf Percent",rate);
-        
+
         delete current_map;
         std::vector<size_t> invalid_indices;
         this->isPathValid = this->planning_scene->isPathValid(plan_start_state,plan_trajectory,PLANNING_GROUP,true,&invalid_indices);
@@ -96,7 +96,7 @@ void Quadrotor::collisionCallback(const hector_moveit_actions::ExecuteDroneTraje
         bool too_close = false;
         for(int i=0;i<invalid_indices.size();i++){
             for(int j=0;j<plan_trajectory.multi_dof_joint_trajectory.points[invalid_indices[i]].transforms.size();j++){
-                
+
                 double x = plan_trajectory.multi_dof_joint_trajectory.points[invalid_indices[i]].transforms[j].translation.x;
                 double y = plan_trajectory.multi_dof_joint_trajectory.points[invalid_indices[i]].transforms[j].translation.y;
                 double z = plan_trajectory.multi_dof_joint_trajectory.points[invalid_indices[i]].transforms[j].translation.z;
@@ -105,7 +105,7 @@ void Quadrotor::collisionCallback(const hector_moveit_actions::ExecuteDroneTraje
                 if(dist < 0.5) too_close = true;
             }
         }
-        
+
        if(!isPathValid && !too_close){
             //TODO: this->move_group->stop(); When migrating to complete MoveIt! ExecuteService, this will work as expected.
             this->trajectory_client.cancelGoal();
@@ -137,9 +137,9 @@ double Quadrotor::countFreeVolume(const octomap::OcTree *octree) {
 void Quadrotor::findFrontier()
 {
     ROS_INFO("Looking for frontiers");
-    myfile.open("exploration_computation_time.csv", std::ofstream::out | std::ofstream::app);
+    this->myfile.open("/home/klyu/bridgeInspection/exploration_computation_time.csv", std::ofstream::out | std::ofstream::app);
 
-    before = ros::Time::now();
+    this->before = ros::Time::now();
     moveit_msgs::GetPlanningScene srv;
     srv.request.components.components = moveit_msgs::PlanningSceneComponents::OCTOMAP;
     ros::spinOnce();
@@ -149,9 +149,9 @@ void Quadrotor::findFrontier()
         this->planning_scene->setPlanningSceneDiffMsg(srv.response.scene);
         octomap_msgs::Octomap octomap = srv.response.scene.world.octomap.octomap;
         octomap::OcTree* current_map = (octomap::OcTree*)octomap_msgs::msgToMap(octomap);
-        
+
         double resolution = current_map->getResolution();
-        
+
         std::vector<std::pair<double, geometry_msgs::Pose> > candidate_frontiers;
         for(octomap::OcTree::leaf_iterator n = current_map->begin_leafs(current_map->getTreeDepth()); n != current_map->end_leafs(); ++n)
         {
@@ -160,7 +160,7 @@ void Quadrotor::findFrontier()
                 double x_cur = n.getX();
                 double y_cur = n.getY();
                 double z_cur = n.getZ();
-                
+
                 bool frontier = false;
 
                 // Check whether very close point is discovered previously
@@ -172,7 +172,7 @@ void Quadrotor::findFrontier()
                     }
                 }
                 // Reject the frontiers that are located in the patches who had many frontiers already discovered.
-                
+
                 if(x_cur < XMIN + resolution || x_cur > XMAX - resolution
                 || y_cur < YMIN + resolution || y_cur > YMAX - resolution
                 || z_cur < ZMIN + resolution || z_cur > ZMAX - resolution) continue;
@@ -183,10 +183,10 @@ void Quadrotor::findFrontier()
                if(already_explored || patches[xpatch][ypatch]>= PATCH_LIMIT)
                     continue;
                 for (double x_cur_buf = x_cur - resolution; x_cur_buf < x_cur + resolution; x_cur_buf += resolution)
-                {   
+                {
                     for (double y_cur_buf = y_cur - resolution; y_cur_buf < y_cur + resolution; y_cur_buf += resolution)
                     {
-                        
+
                         octomap::OcTreeNode *n_cur_frontier = current_map->search(x_cur_buf, y_cur_buf, z_cur);
                         if(!n_cur_frontier)
                         {
@@ -204,7 +204,7 @@ void Quadrotor::findFrontier()
                 }
             }
         }
-        /*std::sort(candidate_frontiers.begin(),candidate_frontiers.end(), 
+        /*std::sort(candidate_frontiers.begin(),candidate_frontiers.end(),
             [](const DistancedPoint& x, const DistancedPoint& y){
                 return x.first > y.first;
             });*/
@@ -213,18 +213,18 @@ void Quadrotor::findFrontier()
             for(int i=0;i<indices.size();i++)
                 indices[i] = i;
             std::random_shuffle(indices.begin(),indices.end());
-            indices.erase(indices.begin()+10,indices.end()); 
+            indices.erase(indices.begin()+10,indices.end());
         }
         for(int i=0;i<indices.size();i++)
             frontiers.push(candidate_frontiers[i]);
     }
-    after = ros::Time::now();
-    temp_comp_time = after - before;
-    comp_time.sec += temp_comp_time.sec;
-    comp_time.nsec += temp_comp_time.nsec;
-    total_frontiers += frontiers.size();
-    myfile << comp_time.sec << "," << comp_time.nsec << "," << total_frontiers << std::endl;
-    myfile.close();
+    this->after = ros::Time::now();
+    this->temp_comp_time = this->after - this->before;
+    this->comp_time.sec += this->temp_comp_time.sec;
+    this->comp_time.nsec += this->temp_comp_time.nsec;
+    this->total_frontiers += frontiers.size();
+    this->myfile << this->comp_time.sec << "," << this->comp_time.nsec << "," << this->total_frontiers << std::endl;
+    this->myfile.close();
 
 }
 
@@ -238,7 +238,7 @@ bool Quadrotor::go(geometry_msgs::Pose& target_)
     target[4] = target_.orientation.y;
     target[5] = target_.orientation.z;
     target[6] = target_.orientation.w;
-    
+
     std::vector<double> start_state_(7);
     start_state_[0] = odometry_information.position.x;
     start_state_[1] = odometry_information.position.y;
@@ -247,10 +247,10 @@ bool Quadrotor::go(geometry_msgs::Pose& target_)
     start_state_[4] = odometry_information.orientation.y;
     start_state_[5] = odometry_information.orientation.z;
     start_state_[6] = odometry_information.orientation.w;
-    
+
     this->move_group->setJointValueTarget(target);
     moveit::planning_interface::MoveGroupInterface::Plan plan;
-    
+
     this->collision = false;
     ROS_INFO("Try to start from [%lf,%lf,%lf]",odometry_information.position.x,odometry_information.position.y,odometry_information.position.z);
     ROS_INFO("Try to go to [%lf,%lf,%lf]",target_.position.x,target_.position.y,target_.position.z);
@@ -259,7 +259,7 @@ bool Quadrotor::go(geometry_msgs::Pose& target_)
 
     this->isPathValid = (move_group->plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
     if(this->isPathValid){
-        
+
         this->plan_start_state = plan.start_state_;
         this->plan_trajectory = plan.trajectory_;
         while(!trajectory_received){
@@ -267,7 +267,7 @@ bool Quadrotor::go(geometry_msgs::Pose& target_)
             ros::Duration(0.2).sleep();
         }
         hector_moveit_actions::ExecuteDroneTrajectoryGoal goal;
-        
+
         for(int i=0;i<trajectory.size();i++){
             if(i==0){
                 double y_diff = trajectory[i].position.y - odometry_information.position.y;
@@ -286,9 +286,9 @@ bool Quadrotor::go(geometry_msgs::Pose& target_)
                 double y_diff = next_waypoint.position.y - trajectory[i].position.y;
                 double x_diff = next_waypoint.position.x - trajectory[i].position.x;
                 double yaw = atan2(y_diff,x_diff);
-                
+
                 if(fabs(y_diff)>EPSILON || fabs(x_diff)>EPSILON ){ //Prevent 0 division
-                    
+
                     tf::Quaternion q = tf::createQuaternionFromYaw(yaw+M_PI);
                     trajectory[i+1].orientation.x = q.x();
                     trajectory[i+1].orientation.y = q.y();
@@ -297,7 +297,7 @@ bool Quadrotor::go(geometry_msgs::Pose& target_)
                 }
             }
             goal.trajectory.push_back(trajectory[i]);
-        }    
+        }
         ROS_INFO("Send Trajectory Goal");
         trajectory_client.sendGoal(goal,actionlib::SimpleActionClient<hector_moveit_actions::ExecuteDroneTrajectoryAction>::SimpleDoneCallback(),
                             actionlib::SimpleActionClient<hector_moveit_actions::ExecuteDroneTrajectoryAction>::SimpleActiveCallback(),
@@ -331,7 +331,7 @@ void Quadrotor::run()
             rate.sleep();
         bool success = false;
         findFrontier();
-        
+
         do{
             if(frontiers.empty()) break;
             geometry_msgs::Pose _goal = frontiers.front().second;
@@ -339,8 +339,8 @@ void Quadrotor::run()
             explored.push_back(_goal); // Valid or not, make sure that will not be offered as candidate again.
             bool invalid = false;
             for(int i=0;i<invalid_poses.size();i++){
-                
-                if(sqrt(pow(invalid_poses[i].position.x - _goal.position.x,2) + pow(invalid_poses[i].position.y - _goal.position.y,2) 
+
+                if(sqrt(pow(invalid_poses[i].position.x - _goal.position.x,2) + pow(invalid_poses[i].position.y - _goal.position.y,2)
                     + pow(invalid_poses[i].position.z - _goal.position.z,2)) < 1.5){
                     invalid = true;
                     invalid_poses.push_back(_goal);
