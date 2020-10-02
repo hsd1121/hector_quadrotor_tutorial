@@ -21,7 +21,7 @@
 #include <hector_moveit_actions/ExecuteDroneTrajectoryAction.h>
 
 #include <octomap/OcTree.h>
-
+#include <fstream>
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -97,6 +97,13 @@ class Quadrotor{
         void findFrontier();
 
         bool go(geometry_msgs::Pose& target_);
+
+        int total_frontiers;
+
+        std::ofstream myfile;
+
+        ros::Time before, after;
+        ros::Duration comp_time;
 
     public:
         Quadrotor(ros::NodeHandle& nh);
