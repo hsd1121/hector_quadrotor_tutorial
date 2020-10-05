@@ -174,11 +174,12 @@ void Quadrotor::findFrontier()
                 if(x_cur < XMIN + resolution || x_cur > XMAX - resolution
                 || y_cur < YMIN + resolution || y_cur > YMAX - resolution
                 || z_cur < ZMIN + resolution || z_cur > ZMAX - resolution) continue;
-                double xspan = XMAX-XMIN;
-                double yspan = YMAX-YMIN;
-                int xpatch = (x_cur-XMIN)*GRID/xspan;
-                int ypatch = (y_cur-YMIN)*GRID/yspan;
-               if(already_explored || patches[xpatch][ypatch]>= PATCH_LIMIT)
+                // double xspan = XMAX-XMIN;
+                // double yspan = YMAX-YMIN;
+                // int xpatch = (x_cur-XMIN)*GRID/xspan;
+                // int ypatch = (y_cur-YMIN)*GRID/yspan;
+               // if(already_explored || patches[xpatch][ypatch]>= PATCH_LIMIT)
+               if(already_explored)
                     continue;
                 for (double x_cur_buf = x_cur - resolution; x_cur_buf < x_cur + resolution; x_cur_buf += resolution)
                 {
