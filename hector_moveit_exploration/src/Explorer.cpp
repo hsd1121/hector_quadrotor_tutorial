@@ -30,6 +30,8 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
 
     total_frontiers = 0;
     std::remove("/home/klyu/bridgeInspection/exploration_computation_time.csv");
+
+    random_frontier = true;
 }
 
 void Quadrotor::poseCallback(const nav_msgs::Odometry::ConstPtr & msg)
@@ -198,7 +200,7 @@ void Quadrotor::findFrontier()
                     p.position.x = x_cur;p.position.y = y_cur;p.position.z = z_cur;
                     p.orientation.w = 1;
                     double dist = sqrt(pow(p.position.x - odometry_information.position.x,2) + pow(p.position.y - odometry_information.position.y,2) + pow(p.position.z - odometry_information.position.z,2));
-                    if(dist > 2)
+                    //if(dist > 2)
                         candidate_frontiers.push_back({dist,p});
                 }
             }
@@ -206,16 +208,31 @@ void Quadrotor::findFrontier()
         /*std::sort(candidate_frontiers.begin(),candidate_frontiers.end(),
             [](const DistancedPoint& x, const DistancedPoint& y){
                 return x.first > y.first;
-            });*/
+            });*/        
+
         std::vector<int> indices(candidate_frontiers.size());
-        if(candidate_frontiers.size() > 10){
+
+        if(random_frontier)
+        {
+            if(candidate_frontiers.size() > 10){
+                for(int i=0;i<indices.size();i++)
+                    indices[i] = i;
+                std::random_shuffle(indices.begin(),indices.end());
+                indices.erase(indices.begin()+10,indices.end());
+            }
             for(int i=0;i<indices.size();i++)
-                indices[i] = i;
-            std::random_shuffle(indices.begin(),indices.end());
-            indices.erase(indices.begin()+10,indices.end());
+                frontiers.push(candidate_frontiers[i]);
         }
-        for(int i=0;i<indices.size();i++)
-            frontiers.push(candidate_frontiers[i]);
+        else {
+            std::vector<float> distances(candidate_frontiers.size());
+            for(int i = 0; i < distances.size(); i++)
+            {
+                distances[i] = candidate_frontiers[i].first;
+            }
+            int minIndex = std::min_element(distances.begin(), distances.end()) - distances.begin();
+
+            frontiers.push(candidate_frontiers[minIndex]);
+        }
     }
     this->end = std::chrono::steady_clock::now();
     this->total_frontiers += frontiers.size();

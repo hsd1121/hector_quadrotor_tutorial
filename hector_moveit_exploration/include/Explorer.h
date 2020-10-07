@@ -48,6 +48,7 @@ typedef std::priority_queue<DistancedPoint,std::vector<DistancedPoint>, Compare>
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <algorithm>
 
 using namespace std;
 using  ns = chrono::nanoseconds;
@@ -97,6 +98,8 @@ class Quadrotor{
         void findFrontier();
 
         bool go(geometry_msgs::Pose& target_);
+
+        bool random_frontier;
 
         int total_frontiers;
 
