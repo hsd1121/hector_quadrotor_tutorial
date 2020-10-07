@@ -175,6 +175,8 @@ void Quadrotor::findFrontier()
                         break;
                     }
                 }
+                if(already_explored)
+                    continue;
                 // Reject the frontiers that are located in the patches who had many frontiers already discovered.
 
                 if(x_cur < XMIN + resolution || x_cur > XMAX - resolution
@@ -190,8 +192,7 @@ void Quadrotor::findFrontier()
                     if(patches[xpatch][ypatch]>= frontier_per_grid)
                         continue;
                 }
-                if(already_explored)
-                    continue;
+
                 for (double x_cur_buf = x_cur - resolution; x_cur_buf < x_cur + resolution; x_cur_buf += resolution)
                 {
                     for (double y_cur_buf = y_cur - resolution; y_cur_buf < y_cur + resolution; y_cur_buf += resolution)
