@@ -101,6 +101,8 @@ class Quadrotor{
 
         bool random_frontier;
 
+        int num_of_frontiers;
+
         int total_frontiers;
 
         std::ofstream myfile;
