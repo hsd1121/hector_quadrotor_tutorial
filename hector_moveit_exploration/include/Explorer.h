@@ -55,7 +55,7 @@ using  ns = chrono::nanoseconds;
 using get_time = chrono::steady_clock;
 
 #include <omp.h>
-#define PATCH_LIMIT 1
+
 class Quadrotor{
     private:
         std::unique_ptr<moveit::planning_interface::MoveGroupInterface> move_group;
@@ -104,6 +104,10 @@ class Quadrotor{
         int num_of_frontiers;
 
         int total_frontiers;
+
+        bool grid_check;
+
+        int frontier_per_grid;
 
         std::ofstream myfile;
 

@@ -33,6 +33,9 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
 
     random_frontier = true;
     num_of_frontiers = 10;
+
+    grid_check = false;
+    frontier_per_grid = 1;
 }
 
 void Quadrotor::poseCallback(const nav_msgs::Odometry::ConstPtr & msg)
@@ -177,11 +180,15 @@ void Quadrotor::findFrontier()
                 if(x_cur < XMIN + resolution || x_cur > XMAX - resolution
                 || y_cur < YMIN + resolution || y_cur > YMAX - resolution
                 || z_cur < ZMIN + resolution || z_cur > ZMAX - resolution) continue;
-                // double xspan = XMAX-XMIN;
-                // double yspan = YMAX-YMIN;
-                // int xpatch = (x_cur-XMIN)*GRID/xspan;
-                // int ypatch = (y_cur-YMIN)*GRID/yspan;
-               // if(already_explored || patches[xpatch][ypatch]>= PATCH_LIMIT)
+
+                if(grid_check)
+                {
+                    double xspan = XMAX-XMIN;
+                    double yspan = YMAX-YMIN;
+                    int xpatch = (x_cur-XMIN)*GRID/xspan;
+                    int ypatch = (y_cur-YMIN)*GRID/yspan;
+                    if(already_explored || patches[xpatch][ypatch]>= frontier_per_grid)
+                }
                if(already_explored)
                     continue;
                 for (double x_cur_buf = x_cur - resolution; x_cur_buf < x_cur + resolution; x_cur_buf += resolution)
