@@ -235,7 +235,7 @@ void Quadrotor::findFrontier()
                 for(int i=0; i < num_of_frontiers; i++)
                 {
                     int minIndex = std::min_element(distances.begin(), distances.end()) - distances.begin();
-                    indices.push(minIndex);
+                    indices.push_back(minIndex);
                     distances.erase(minIndex);
                 }
                 indices.erase(indices.begin()+num_of_frontiers,indices.end());
@@ -246,7 +246,7 @@ void Quadrotor::findFrontier()
             {
                 for(int i = 0; i < candidate_frontiers.size(); i++)
                 {
-                    frontiers.push(canddiate_frontiers[i]);
+                    frontiers.push(candidate_frontiers[i]);
                 }
             }
 
