@@ -208,7 +208,7 @@ void Quadrotor::findFrontier()
         /*std::sort(candidate_frontiers.begin(),candidate_frontiers.end(),
             [](const DistancedPoint& x, const DistancedPoint& y){
                 return x.first > y.first;
-            });*/        
+            });*/
 
         std::vector<int> indices(candidate_frontiers.size());
 
