@@ -34,7 +34,7 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
     random_frontier = true;
     num_of_frontiers = 10;
 
-    grid_check = false;
+    grid_check = false; //true: exploration.launch, false: frontier_exploration.launch
     frontier_per_grid = 1;
 }
 
@@ -260,7 +260,7 @@ void Quadrotor::findFrontier()
             }
 
 
-            
+
         }
     }
     this->end = std::chrono::steady_clock::now();
