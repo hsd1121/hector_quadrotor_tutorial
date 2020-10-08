@@ -31,8 +31,8 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
     total_frontiers = 0;
     std::remove("/home/klyu/bridgeInspection/exploration_computation_time.csv");
 
-    random_frontier = false;
-    num_of_frontiers = 10;
+    random_frontier = true;
+    num_of_frontiers = 1;
 
     grid_check = false; //true: exploration.launch, false: frontier_exploration.launch
     frontier_per_grid = 1;
