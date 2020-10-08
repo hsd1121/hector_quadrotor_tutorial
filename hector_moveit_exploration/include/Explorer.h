@@ -25,10 +25,10 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <queue>
-#define XMIN -19
-#define XMAX 19
-#define YMIN -5
-#define YMAX 15
+#define XMIN -20
+#define XMAX 20
+#define YMIN -6
+#define YMAX 16
 #define ZMIN 0.2
 #define ZMAX 10.0
 
