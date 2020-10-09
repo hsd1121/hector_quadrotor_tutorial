@@ -35,7 +35,7 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh) : trajectory_client("/action/trajector
     num_of_frontiers = 10;
 
     grid_check = true; //true: exploration.launch, false: frontier_exploration.launch
-    frontier_per_grid = 1;
+    frontier_per_grid = 2;
 }
 
 void Quadrotor::poseCallback(const nav_msgs::Odometry::ConstPtr & msg)
