@@ -39,17 +39,6 @@
 
 #define EPSILON 1e-4
 
-typedef std::pair<double,geometry_msgs::Pose> DistancedPoint;
-
-class Compare{
-    public: 
-        bool operator()(DistancedPoint& lhs, DistancedPoint & rhs)
-        {
-            return lhs.first < rhs.first;
-        }
-};
-typedef std::priority_queue<DistancedPoint,std::vector<DistancedPoint>, Compare> DistancedPointPriorityQueue;
-
 #include <iostream>
 #include <chrono>
 
@@ -58,7 +47,6 @@ using  ns = chrono::nanoseconds;
 using get_time = chrono::steady_clock;
 
 #include <omp.h>
-#define PATCH_LIMIT 1
 class Quadrotor{
     private:
         ros::NodeHandle nh_;
@@ -72,7 +60,6 @@ class Quadrotor{
         hector_moveit_navigation::NavigationFeedback feedback_;
         hector_moveit_navigation::NavigationResult result_;
 
-        const double takeoff_altitude = 1.0;
         bool odom_received,trajectory_received;
         bool isPathValid;
         bool collision;
@@ -82,7 +69,6 @@ class Quadrotor{
         
         ros::Subscriber base_sub,plan_sub,goal_sub,distance_sub;
         ros::Publisher distance_pub;
-        ros::Publisher frontier_pub;
 
         ros::ServiceClient motor_enable_service; 
         ros::ServiceClient planning_scene_service;
@@ -90,6 +76,8 @@ class Quadrotor{
         moveit_msgs::RobotState plan_start_state;
         moveit_msgs::RobotTrajectory plan_trajectory;
     
+        bool traversing;
+
         const std::string PLANNING_GROUP = "DroneBody";
 
         void poseCallback(const nav_msgs::Odometry::ConstPtr & msg);
@@ -102,8 +90,6 @@ class Quadrotor{
 
         void computePathLengthCB(const geometry_msgs::Point::ConstPtr &path);
 
-        bool traversing;
-    
     public:
         Quadrotor(ros::NodeHandle& nh, std::string name);
         void enableMotors();

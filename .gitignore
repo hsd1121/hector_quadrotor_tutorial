@@ -1,1 +1,9 @@
 hector_moveit_navigation/src/pipeline_test.cpp
+hector_moveit_gtsp_exploration/
+hector_moveit_navigation/src/emmanuel_ai4all_frontier_exploration.py
+hector_moveit_navigation/src/get_image.py
+hector_moveit_navigation/src/image_server.py
+hector_moveit_navigation/src/megan_ai4all_frontier_exploration.py
+hector_moveit_navigation/src/object_detection.py
+hector_moveit_navigation/src/sahana_ai4all_frontier_exploration.py
+hector_moveit_navigation/src/ai4all_frontier_exploration.py
