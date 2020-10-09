@@ -73,7 +73,6 @@ class Quadrotor{
         hector_moveit_navigation::NavigationResult result_;
 
         const double takeoff_altitude = 1.0;
-        int GRID;
         bool odom_received,trajectory_received;
         bool isPathValid;
         bool collision;
@@ -81,9 +80,6 @@ class Quadrotor{
         geometry_msgs::Pose odometry_information;
         std::vector<geometry_msgs::Pose> trajectory;
         
-        std::vector<geometry_msgs::Pose> frontiers;
-        std::vector<geometry_msgs::Pose> explored;
-
         ros::Subscriber base_sub,plan_sub,goal_sub,distance_sub;
         ros::Publisher distance_pub;
         ros::Publisher frontier_pub;
@@ -106,7 +102,7 @@ class Quadrotor{
 
         void computePathLengthCB(const geometry_msgs::Point::ConstPtr &path);
 
-        void findFrontier();
+        bool traversing;
     
     public:
         Quadrotor(ros::NodeHandle& nh, std::string name);
