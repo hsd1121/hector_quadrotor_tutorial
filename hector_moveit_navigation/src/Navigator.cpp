@@ -17,7 +17,6 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh, std::string name) :
     distance_sub = nh.subscribe<geometry_msgs::Point>("/compute_path/point",1,&Quadrotor::computePathLengthCB,this);
     
     distance_pub = nh.advertise<std_msgs::Float64>("/compute_path/length",1);
-    frontier_pub = nh.advertise<geometry_msgs::PoseArray>("/frontiers", 1);
 
     move_group.reset(new moveit::planning_interface::MoveGroupInterface(PLANNING_GROUP));
     robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
@@ -32,11 +31,16 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh, std::string name) :
     
     start_state.reset(new robot_state::RobotState(move_group->getRobotModel()));
     planning_scene.reset(new planning_scene::PlanningScene(kmodel));
+
+    traversing = false;
     
 }
 
 void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr &goal)
 {
+    while(traversing)
+        ROS_INFO("Waiting for compute distance check to finish");
+    traversing = true;
     feedback_.feedback_pose = odometry_information;
 
     std::vector<double> target(7);
@@ -66,7 +70,8 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
     this->start_state->setVariablePositions(start_state_);
     this->move_group->setStartState(*start_state);
 
-    this->isPathValid = (move_group->plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+    moveit::planning_interface::MoveItErrorCode moveiterrorcode = move_group->plan(plan);
+    this->isPathValid = (moveiterrorcode == moveit::planning_interface::MoveItErrorCode::SUCCESS);
     if(this->isPathValid){
         
         this->plan_start_state = plan.start_state_;
@@ -130,9 +135,14 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
         this->trajectory_received = false;
         this->odom_received = false;
     }
+    else
+    {
+        ROS_INFO("Moveit Error Code: %d", moveiterrorcode.val);
+    }
     result_.result_pose = feedback_.feedback_pose;
     as_.setSucceeded(result_);
 
+    traversing = false;
     //return this->isPathValid;
 }
 
@@ -170,28 +180,7 @@ void Quadrotor::collisionCallback(const hector_moveit_actions::ExecuteDroneTraje
     srv.request.components.components = moveit_msgs::PlanningSceneComponents::OCTOMAP;
     if(planning_scene_service.call(srv)){
         this->planning_scene->setPlanningSceneDiffMsg(srv.response.scene);
-        octomap_msgs::Octomap octomap = srv.response.scene.world.octomap.octomap;
-        octomap::OcTree* current_map = (octomap::OcTree*)octomap_msgs::msgToMap(octomap);
-        
-        double resolution = current_map->getResolution();
-        int unknown = 0, known = 0;
-        for(double ix=XMIN;ix<XMAX;ix+=resolution){
-            for(double iy=YMIN;iy<YMAX;iy+=resolution){
-                for(double iz=ZMIN;iz<ZMAX;iz+=resolution){
-                    if(!current_map->search(ix,iy,iz))
-                        unknown++;
-                    else
-                        known++;
-                }
-            }
-        }
-        double rate = known*100.0/(float)(unknown+known);
-        std_msgs::Float64 msg;
-        msg.data = rate;
-        //rate_ack.publish(msg);
-        //ROS_INFO("Coverage of Orchard Volume: %lf Percent",rate);
-        
-        delete current_map;
+
         std::vector<size_t> invalid_indices;
         this->isPathValid = this->planning_scene->isPathValid(plan_start_state,plan_trajectory,PLANNING_GROUP,true,&invalid_indices);
         ros::spinOnce();
@@ -204,11 +193,19 @@ void Quadrotor::collisionCallback(const hector_moveit_actions::ExecuteDroneTraje
                 double z = plan_trajectory.multi_dof_joint_trajectory.points[invalid_indices[i]].transforms[j].translation.z;
 
                 double dist = sqrt(pow(x-odometry_information.position.x,2) + pow(y-odometry_information.position.y,2) + pow(z-odometry_information.position.z,2));
-                if(dist < 0.5) too_close = true;
+                if(dist < 0.5) 
+                {
+                    ROS_INFO("Trajectory location [%f, %f, %f] is too close (< 0.5 meters) to collision.", x, y, z);
+                    too_close = true;
+                }
             }
         }
         
-       if(!isPathValid && !too_close){
+        if(!isPathValid && !too_close){
+            if(!isPathValid)
+                ROS_INFO("Invalid path");
+            if(!too_close)
+                ROS_INFO("Trajectory is too close");
             //TODO: this->move_group->stop(); When migrating to complete MoveIt! ExecuteService, this will work as expected.
             this->trajectory_client.cancelGoal();
             this->collision = true;
@@ -221,6 +218,9 @@ void Quadrotor::collisionCallback(const hector_moveit_actions::ExecuteDroneTraje
 
 void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
 {
+    while(traversing)
+        ROS_INFO("Waiting for drone traversal to finish before checking distance");
+    traversing = true;
 
     ROS_INFO("Computing MoveIt distance from (%f,%f,%f) to (%f,%f,%f)", odometry_information.position.x, odometry_information.position.y, odometry_information.position.z, 
                                                                         point->x, point->y, point->z);
@@ -285,97 +285,7 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
         distance_pub.publish(distance);
         ROS_INFO("MoveIt distance is %f", distance.data);
     }
-}
-
-void Quadrotor::findFrontier()
-{
-    moveit_msgs::GetPlanningScene srv;
-    srv.request.components.components = moveit_msgs::PlanningSceneComponents::OCTOMAP;
-    ros::spinOnce();
-
-    if(planning_scene_service.call(srv)){
-        this->planning_scene->setPlanningSceneDiffMsg(srv.response.scene);
-        octomap_msgs::Octomap octomap = srv.response.scene.world.octomap.octomap;
-        octomap::OcTree* current_map = (octomap::OcTree*)octomap_msgs::msgToMap(octomap);
-        
-        geometry_msgs::PoseArray posearray;
-        double resolution = current_map->getResolution();
-
-        std::vector<std::pair<double, geometry_msgs::Pose> > candidate_frontiers;
-        for(octomap::OcTree::leaf_iterator n = current_map->begin_leafs(current_map->getTreeDepth()); n != current_map->end_leafs(); ++n)
-        {
-          //  ROS_INFO("Node size: %f", n.getSize());
-
-            double x_cur = n.getX();
-            double y_cur = n.getY();
-            double z_cur = n.getZ();
-            if(x_cur > XMIN && x_cur < XMAX && 
-               y_cur > YMIN && y_cur < YMAX && 
-               z_cur > ZMIN && z_cur < ZMAX)
-            {
-                
-                if(!current_map->isNodeOccupied(*n))
-                {
-                    octomap::OcTreeKey key = n.getKey();
-                    octomap::OcTreeKey neighborkey;
-                    for(int i = 0; i < 4; i++)
-                    {
-                        neighborkey = key;
-                        switch(i)
-                        {
-                            case 0:
-                                neighborkey[0] += 1;
-                                break;
-                            case 1:
-                                neighborkey[0] -= 1;
-                                break;
-                            case 2:
-                                neighborkey[1] += 1;
-                                break;
-                            case 3:
-                                neighborkey[1] -= 1;
-                                break;
-                            default:
-                                ROS_INFO("Error: Got to default in switch neighbor check");
-                                break;
-                        }
-                        octomap::OcTreeNode* result = current_map->search(neighborkey);
-                        if(result == NULL)
-                        {
-                            geometry_msgs::Pose p;
-                            p.position.x = x_cur;
-                            p.position.y = y_cur;
-                            p.position.z = z_cur;
-                            p.orientation.x = odometry_information.orientation.x;
-                            p.orientation.y = odometry_information.orientation.y;
-                            p.orientation.z = odometry_information.orientation.z;
-                            p.orientation.w = odometry_information.orientation.w;
-
-                            double dist = sqrt(pow(p.position.x - odometry_information.position.x,2) + pow(p.position.y - odometry_information.position.y,2) + pow(p.position.z - odometry_information.position.z,2));
-                            if(dist > 2)
-                                candidate_frontiers.push_back({dist,p});
-
-                            continue;
-                        }
-                    }
-                    
-                    
-                }
-                
-            }
-        }
-
-        std::vector<int> indices(candidate_frontiers.size());
-        for(int i=0;i<indices.size();i++)
-            posearray.poses.push_back(candidate_frontiers[i].second);
-        if(indices.size() > 0)
-        {
-            posearray.header.stamp = ros::Time::now();
-            frontier_pub.publish(posearray);
-        }
-    }
-
-
+    traversing = false;
 }
 
 void Quadrotor::enableMotors()
@@ -400,7 +310,6 @@ void Quadrotor::run()
     while(ros::ok()){
         while(!odom_received)
             rate.sleep();
-        this->findFrontier();
 
         ros::spinOnce();
         rate.sleep();
