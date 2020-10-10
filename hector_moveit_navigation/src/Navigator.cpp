@@ -261,7 +261,8 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
     this->start_state->setVariablePositions(start_state_);
     this->move_group->setStartState(*start_state);
 
-    this->isPathValid = (move_group->plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+    moveit::planning_interface::MoveItErrorCode moveiterrorcode = move_group->plan(plan);    
+    this->isPathValid = (moveiterrorcode == moveit::planning_interface::MoveItErrorCode::SUCCESS);
     if(this->isPathValid){
         ROS_INFO("Path is valid");
         this->plan_start_state = plan.start_state_;
@@ -284,6 +285,14 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
         }    
         distance_pub.publish(distance);
         ROS_INFO("MoveIt distance is %f", distance.data);
+    }
+    else
+    {
+        ROS_INFO("Path is NOT valid");
+        ROS_INFO("Moveit Error Code: %d", moveiterrorcode.val);
+        distance.data = -1;
+        distance_pub.publish(distance);
+        ROS_INFO("Sending distance of -1 (invalid)");
     }
     traversing = false;
 }
