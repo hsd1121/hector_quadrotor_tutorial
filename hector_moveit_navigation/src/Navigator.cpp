@@ -39,7 +39,7 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh, std::string name) :
 void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr &goal)
 {
   int timeOut = 0;
-    while(traversing || timeOut == 50){
+    while(traversing && timeOut < 50){
         ROS_INFO("Waiting for compute distance check to finish");
         timeOut++;
         ros::Duration(0.2).sleep();
@@ -223,7 +223,7 @@ void Quadrotor::collisionCallback(const hector_moveit_actions::ExecuteDroneTraje
 void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
 {
   int timeOut = 0;
-    while(traversing || timeOut == 50){
+    while(traversing && timeOut < 50){
         ROS_INFO("Waiting for drone traversal to finish before checking distance");
         timeOut++;
         ros::Duration(0.2).sleep();
