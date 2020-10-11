@@ -40,6 +40,7 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
 {
     while(traversing)
         ROS_INFO("Waiting for compute distance check to finish");
+        ros::Duration(0.2).sleep();
     traversing = true;
     feedback_.feedback_pose = odometry_information;
 
@@ -220,6 +221,7 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
 {
     while(traversing)
         ROS_INFO("Waiting for drone traversal to finish before checking distance");
+        ros::Duration(0.2).sleep();
     traversing = true;
 
     ROS_INFO("Computing MoveIt distance from (%f,%f,%f) to (%f,%f,%f)", odometry_information.position.x, odometry_information.position.y, odometry_information.position.z,
