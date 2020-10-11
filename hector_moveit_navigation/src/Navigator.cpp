@@ -264,7 +264,7 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
     this->move_group->setStartState(*start_state);
     ROS_INFO("After computer distance");
 
-	moveit::planning_interface::MoveItErrorCode moveiterrorcode = move_group->plan(plan);
+	  moveit::planning_interface::MoveItErrorCode moveiterrorcode = move_group->plan(plan);
     this->isPathValid = (moveiterrorcode == moveit::planning_interface::MoveItErrorCode::SUCCESS);
     ROS_INFO("Moveit Error Code: %d", moveiterrorcode.val);
     if(this->isPathValid){
