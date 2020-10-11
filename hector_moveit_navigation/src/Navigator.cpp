@@ -266,6 +266,7 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
 
 	moveit::planning_interface::MoveItErrorCode moveiterrorcode = move_group->plan(plan);
     this->isPathValid = (moveiterrorcode == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+    ROS_INFO("Moveit Error Code: %d", moveiterrorcode.val);
     if(this->isPathValid){
         ROS_INFO("Path is valid");
         this->plan_start_state = plan.start_state_;
