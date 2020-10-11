@@ -319,12 +319,15 @@ void Quadrotor::enableMotors()
 void Quadrotor::run()
 {
     ros::Rate rate(2);
+    ros::AsyncSpinner spinner(4);
     int count = 1;
     while(ros::ok()){
-        while(!odom_received)
-            rate.sleep();
-
-        ros::spinOnce();
+        if(!odom_received){
+          spinner.stop();
+          rate.sleep();
+        }
+        spinner.start();
+        // ros::spinOnce();
         rate.sleep();
     }
 }
