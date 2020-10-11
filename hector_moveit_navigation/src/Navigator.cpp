@@ -1,6 +1,6 @@
 #include <Navigator.h>
 
-Quadrotor::Quadrotor(ros::NodeHandle& nh, std::string name) : 
+Quadrotor::Quadrotor(ros::NodeHandle& nh, std::string name) :
     as_(nh_, name, boost::bind(&Quadrotor::executeCB, this, _1), false),
     action_name_(name),
     trajectory_client("/action/trajectory",true)
@@ -15,25 +15,25 @@ Quadrotor::Quadrotor(ros::NodeHandle& nh, std::string name) :
     base_sub = nh.subscribe<nav_msgs::Odometry>("/ground_truth/state",10,&Quadrotor::poseCallback,this);
     plan_sub = nh.subscribe<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path",1,&Quadrotor::planCallback,this);
     distance_sub = nh.subscribe<geometry_msgs::Point>("/compute_path/point",1,&Quadrotor::computePathLengthCB,this);
-    
+
     distance_pub = nh.advertise<std_msgs::Float64>("/compute_path/length",1);
 
     move_group.reset(new moveit::planning_interface::MoveGroupInterface(PLANNING_GROUP));
     robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
     robot_model::RobotModelPtr kmodel = robot_model_loader.getModel();
-    
+
     motor_enable_service = nh.serviceClient<hector_uav_msgs::EnableMotors>("/enable_motors");
     planning_scene_service = nh.serviceClient<moveit_msgs::GetPlanningScene>("/get_planning_scene");
 
     move_group->setPlannerId("RRTConnectkConfigDefault");
     move_group->setNumPlanningAttempts(10);
     move_group->setWorkspace(XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX);
-    
+
     start_state.reset(new robot_state::RobotState(move_group->getRobotModel()));
     planning_scene.reset(new planning_scene::PlanningScene(kmodel));
 
     traversing = false;
-    
+
 }
 
 void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr &goal)
@@ -51,7 +51,7 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
     target[4] = goal->goal_pose.orientation.y;
     target[5] = goal->goal_pose.orientation.z;
     target[6] = goal->goal_pose.orientation.w;
-    
+
     std::vector<double> start_state_(7);
     start_state_[0] = odometry_information.position.x;
     start_state_[1] = odometry_information.position.y;
@@ -60,10 +60,10 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
     start_state_[4] = odometry_information.orientation.y;
     start_state_[5] = odometry_information.orientation.z;
     start_state_[6] = odometry_information.orientation.w;
-    
+
     this->move_group->setJointValueTarget(target);
     moveit::planning_interface::MoveGroupInterface::Plan plan;
-    
+
     this->collision = false;
     ROS_INFO("Try to start from [%lf,%lf,%lf] with orienation [%lf, %lf, %lf, %lf]",odometry_information.position.x,odometry_information.position.y,odometry_information.position.z,odometry_information.orientation.x,odometry_information.orientation.y,odometry_information.orientation.z,odometry_information.orientation.w);
     ROS_INFO("Try to go to [%lf,%lf,%lf] with orienation [%lf, %lf, %lf, %lf]",goal->goal_pose.position.x,goal->goal_pose.position.y,goal->goal_pose.position.z,goal->goal_pose.orientation.x,goal->goal_pose.orientation.y,goal->goal_pose.orientation.z,goal->goal_pose.orientation.w);
@@ -73,7 +73,7 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
     moveit::planning_interface::MoveItErrorCode moveiterrorcode = move_group->plan(plan);
     this->isPathValid = (moveiterrorcode == moveit::planning_interface::MoveItErrorCode::SUCCESS);
     if(this->isPathValid){
-        
+
         this->plan_start_state = plan.start_state_;
         this->plan_trajectory = plan.trajectory_;
         while(!trajectory_received){
@@ -81,7 +81,7 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
             ros::Duration(0.2).sleep();
         }
         hector_moveit_actions::ExecuteDroneTrajectoryGoal goal;
-        
+
         for(int i=0;i<trajectory.size();i++){
             if(i==0){
                 double y_diff = trajectory[i].position.y - odometry_information.position.y;
@@ -100,9 +100,9 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
                 double y_diff = next_waypoint.position.y - trajectory[i].position.y;
                 double x_diff = next_waypoint.position.x - trajectory[i].position.x;
                 double yaw = atan2(y_diff,x_diff);
-                
+
                 if(fabs(y_diff)>EPSILON || fabs(x_diff)>EPSILON ){ //Prevent 0 division
-                    
+
                     tf::Quaternion q = tf::createQuaternionFromYaw(yaw+M_PI);
                     trajectory[i+1].orientation.x = q.x();
                     trajectory[i+1].orientation.y = q.y();
@@ -111,7 +111,7 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
                 }
             }
             goal.trajectory.push_back(trajectory[i]);
-        }    
+        }
         ROS_INFO("Send Trajectory Goal");
         trajectory_client.sendGoal(goal,actionlib::SimpleActionClient<hector_moveit_actions::ExecuteDroneTrajectoryAction>::SimpleDoneCallback(),
                             actionlib::SimpleActionClient<hector_moveit_actions::ExecuteDroneTrajectoryAction>::SimpleActiveCallback(),
@@ -129,7 +129,7 @@ void Quadrotor::executeCB(const hector_moveit_navigation::NavigationGoalConstPtr
                 ROS_INFO("Trajectory cancelled");
                 return;
             }
-            
+
         }
         ROS_INFO("Trajectory is traversed");
         this->trajectory_received = false;
@@ -187,20 +187,20 @@ void Quadrotor::collisionCallback(const hector_moveit_actions::ExecuteDroneTraje
         bool too_close = false;
         for(int i=0;i<invalid_indices.size();i++){
             for(int j=0;j<plan_trajectory.multi_dof_joint_trajectory.points[invalid_indices[i]].transforms.size();j++){
-                
+
                 double x = plan_trajectory.multi_dof_joint_trajectory.points[invalid_indices[i]].transforms[j].translation.x;
                 double y = plan_trajectory.multi_dof_joint_trajectory.points[invalid_indices[i]].transforms[j].translation.y;
                 double z = plan_trajectory.multi_dof_joint_trajectory.points[invalid_indices[i]].transforms[j].translation.z;
 
                 double dist = sqrt(pow(x-odometry_information.position.x,2) + pow(y-odometry_information.position.y,2) + pow(z-odometry_information.position.z,2));
-                if(dist < 0.5) 
+                if(dist < 0.5)
                 {
                     ROS_INFO("Trajectory location [%f, %f, %f] is too close (< 0.5 meters) to collision.", x, y, z);
                     too_close = true;
                 }
             }
         }
-        
+
         if(!isPathValid && !too_close){
             if(!isPathValid)
                 ROS_INFO("Invalid path");
@@ -222,7 +222,7 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
         ROS_INFO("Waiting for drone traversal to finish before checking distance");
     traversing = true;
 
-    ROS_INFO("Computing MoveIt distance from (%f,%f,%f) to (%f,%f,%f)", odometry_information.position.x, odometry_information.position.y, odometry_information.position.z, 
+    ROS_INFO("Computing MoveIt distance from (%f,%f,%f) to (%f,%f,%f)", odometry_information.position.x, odometry_information.position.y, odometry_information.position.z,
                                                                         point->x, point->y, point->z);
     std::vector<double> target(7);
     target[0] = point->x;
@@ -232,7 +232,7 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
     target[4] = odometry_information.orientation.y;
     target[5] = odometry_information.orientation.z;
     target[6] = odometry_information.orientation.w;
-    
+
     std::vector<double> start_state_(7);
     /*
     start_state_[0] = path->start.x;
@@ -256,12 +256,13 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
 
     this->move_group->setJointValueTarget(target);
     moveit::planning_interface::MoveGroupInterface::Plan plan;
-    
+
     this->collision = false;
     this->start_state->setVariablePositions(start_state_);
     this->move_group->setStartState(*start_state);
+    ROS_INFO("After computer distance");
 
-	moveit::planning_interface::MoveItErrorCode moveiterrorcode = move_group->plan(plan);    
+	moveit::planning_interface::MoveItErrorCode moveiterrorcode = move_group->plan(plan);
     this->isPathValid = (moveiterrorcode == moveit::planning_interface::MoveItErrorCode::SUCCESS);
     if(this->isPathValid){
         ROS_INFO("Path is valid");
@@ -271,7 +272,7 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
             ROS_INFO("Waiting for trajectory");
             //ros::Duration(0.2).sleep();
         }
-            
+
         for(int i=1;i<trajectory.size();i++){
             ROS_INFO("Trajectory #:%d, Point: (%f, %f, %f)", i+1, trajectory[i].position.x, trajectory[i].position.y, trajectory[i].position.z);
             double temp_distance = (trajectory[i].position.x - trajectory[i-1].position.x)*(trajectory[i].position.x - trajectory[i-1].position.x) +
@@ -279,10 +280,10 @@ void Quadrotor::computePathLengthCB(const geometry_msgs::Point::ConstPtr &point)
                                    (trajectory[i].position.z - trajectory[i-1].position.z)*(trajectory[i].position.z - trajectory[i-1].position.z);
             temp_distance = sqrt(temp_distance);
 
-            distance.data += temp_distance;    
+            distance.data += temp_distance;
             ROS_INFO("Step Distance: %f", temp_distance);
-            ROS_INFO("Running Distance: %f", distance.data);                   
-        }    
+            ROS_INFO("Running Distance: %f", distance.data);
+        }
         distance_pub.publish(distance);
         ROS_INFO("MoveIt distance is %f", distance.data);
     }
