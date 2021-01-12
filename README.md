@@ -33,3 +33,5 @@ roslaunch hector_moveit_navigation navigate.launch
 <a href="https://github.com/wilselby/ROS_quadrotor_simulator">ROS Quadrotor Simulator by Wil Selby</a>
 
 <a href="https://github.com/AlessioTonioni/Autonomous-Flight-ROS">Autonomous Flight by Alessio Tonioni</a>
+
+Kevin Yu
