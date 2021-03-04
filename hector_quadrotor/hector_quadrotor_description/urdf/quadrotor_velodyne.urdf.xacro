@@ -20,15 +20,6 @@
     	<origin xyz="0.0 0.0 -0.097" rpy="${M_PI_2} 0 0"/>
     </xacro:vlp16>
 
-    <!-- VLP-16 mounted above the quadrotor body -->
-    <xacro:include filename="$(find hector_sensors_description)/urdf/vlp16.urdf.xacro" />
-    <xacro:vlp16 name="laser1" parent="base_link" ros_topic="velodyne_points1">
-      <!-- Sideways facing rotation -->
-      <!--<origin xyz="0.0 0.0 -0.097" rpy="${M_PI_2} 0 ${M_PI_2}"/>-->
-      <!-- Forward facing rotation -->
-      <origin xyz="0.0 0.0 0.097" rpy="${M_PI_2} ${M_PI} 0"/>
-    </xacro:vlp16>
-
     <!-- Forward facing camera -->
     <xacro:include filename="$(find hector_sensors_description)/urdf/generic_camera.urdf.xacro" />
     <xacro:generic_camera name="front_cam" parent="base_link" ros_topic="camera/image" cam_info_topic="camera/camera_info" update_rate="10" res_x="320" res_y="240" image_format="R8G8B8" hfov="90">
