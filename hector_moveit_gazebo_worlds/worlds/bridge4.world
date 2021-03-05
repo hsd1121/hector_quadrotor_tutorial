@@ -61,45 +61,6 @@
       </attenuation>
       <direction>-0.5 0.1 -0.9</direction>
     </light>
-    <model name='my_mesh'>
-      <pose frame=''>0 0 0 0 -0 0</pose>
-      <static>1</static>
-      <link name='body'>
-        <visual name='visual'>
-          <geometry>
-            <mesh>
-              <uri>file:///home/klyu/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-        </visual>
-        <collision name='collision'>
-          <geometry>
-            <mesh>
-              <uri>file:///home/klyu/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-        <gravity>1</gravity>
-      </link>
-    </model>
     <gravity>0 0 -9.8</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
     <atmosphere type='adiabatic'/>
@@ -3697,15 +3658,25 @@
       <pose frame=''>21.2715 2.53707 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>2925 289000000</sim_time>
-      <real_time>121 465269431</real_time>
-      <wall_time>1614833117 871615618</wall_time>
-      <iterations>121173</iterations>
+      <sim_time>3792 362000000</sim_time>
+      <real_time>868 340115740</real_time>
+      <wall_time>1614867587 150197331</wall_time>
+      <iterations>867073</iterations>
       <model name='bridge4'>
-        <pose frame=''>-13.6133 -0.258882 0 0 -0 0</pose>
+        <pose frame=''>-15.6164 9.42212 0 0 0 -1.57567</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-13.6133 -0.258882 0 0 -0 0</pose>
+          <pose frame=''>-15.6164 9.42212 0 0 0 -1.57567</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='bridge4_clone'>
+        <pose frame=''>0.760924 9.31975 0 0 0 -1.57567</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose frame=''>0.760924 9.31975 0 0 0 -1.57567</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -4121,16 +4092,6 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='my_mesh'>
-        <pose frame=''>0.085822 5.02257 1.16287 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='body'>
-          <pose frame=''>0.085822 5.02257 1.16287 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
       <light name='sun'>
         <pose frame=''>0 0 10 0 -0 0</pose>
       </light>
@@ -4337,7 +4298,7 @@
     </model>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>43.4064 8.1445 40.8401 0 0.717796 3.10101</pose>
+        <pose frame=''>21.2386 -24.3259 29.7186 -0 0.613796 2.26501</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -4441,6 +4402,54 @@
         <kinematic>0</kinematic>
       </link>
       <pose frame=''>-13.6133 -0.258882 0 0 -0 0</pose>
+    </model>
+    <model name='bridge4_clone'>
+      <static>1</static>
+      <link name='link'>
+        <inertial>
+          <pose frame=''>0 0 0 0 -0 0</pose>
+          <mass>50</mass>
+          <inertia>
+            <ixx>2.67</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>114</iyy>
+            <iyz>0</iyz>
+            <izz>132.123</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://bridge4/meshes/bridge4.dae</uri>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://bridge4/meshes/bridge4.dae</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose frame=''>0.760924 9.31975 0 0 0 -1.57567</pose>
     </model>
   </world>
 </sdf>

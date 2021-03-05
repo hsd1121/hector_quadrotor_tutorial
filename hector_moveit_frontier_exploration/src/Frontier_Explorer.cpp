@@ -144,6 +144,7 @@ void Quadrotor::findFrontier()
     while(!frontiers.empty())
         frontiers.pop();
     if(planning_scene_service.call(srv)){
+	ROS_INFO("Got planning scene");
         this->planning_scene->setPlanningSceneDiffMsg(srv.response.scene);
         octomap_msgs::Octomap octomap = srv.response.scene.world.octomap.octomap;
         octomap::OcTree* current_map = (octomap::OcTree*)octomap_msgs::msgToMap(octomap);
@@ -160,9 +161,11 @@ void Quadrotor::findFrontier()
                y_cur > YMIN && y_cur < YMAX && 
                z_cur > ZMIN && z_cur < ZMAX)
             {
+		ROS_INFO("In bounds");
                 
                 if(!current_map->isNodeOccupied(*n))
                 {
+		    ROS_INFO("Voxel is free");
                     octomap::OcTreeKey key = n.getKey();
                     octomap::OcTreeKey neighborkey;
                     for(int i = 0; i < 4; i++)
@@ -189,6 +192,7 @@ void Quadrotor::findFrontier()
                         octomap::OcTreeNode* result = current_map->search(neighborkey);
                         if(result == NULL)
                         {
+			    ROS_INFO("Free voxel has unknown neighbor, add to candidate frontier list");
                             geometry_msgs::Pose p;
                             p.position.x = x_cur;
                             p.position.y = y_cur;
@@ -224,6 +228,7 @@ void Quadrotor::findFrontier()
         }
         for(int i=0;i<indices.size();i++)
             frontiers.push(candidate_frontiers[i]);
+	    std::cout<<indices.size()<<std::endl;
     }
     this->end = std::chrono::steady_clock::now();
     this->total_frontiers += frontiers.size();
