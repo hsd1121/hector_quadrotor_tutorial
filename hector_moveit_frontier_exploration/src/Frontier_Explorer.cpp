@@ -144,7 +144,6 @@ void Quadrotor::findFrontier()
     while(!frontiers.empty())
         frontiers.pop();
     if(planning_scene_service.call(srv)){
-	ROS_INFO("Got planning scene");
         this->planning_scene->setPlanningSceneDiffMsg(srv.response.scene);
         octomap_msgs::Octomap octomap = srv.response.scene.world.octomap.octomap;
         octomap::OcTree* current_map = (octomap::OcTree*)octomap_msgs::msgToMap(octomap);
@@ -161,11 +160,8 @@ void Quadrotor::findFrontier()
                y_cur > YMIN && y_cur < YMAX && 
                z_cur > ZMIN && z_cur < ZMAX)
             {
-		ROS_INFO("In bounds");
-                
                 if(!current_map->isNodeOccupied(*n))
                 {
-		    ROS_INFO("Voxel is free");
                     octomap::OcTreeKey key = n.getKey();
                     octomap::OcTreeKey neighborkey;
                     for(int i = 0; i < 4; i++)
@@ -192,7 +188,6 @@ void Quadrotor::findFrontier()
                         octomap::OcTreeNode* result = current_map->search(neighborkey);
                         if(result == NULL)
                         {
-			    ROS_INFO("Free voxel has unknown neighbor, add to candidate frontier list");
                             geometry_msgs::Pose p;
                             p.position.x = x_cur;
                             p.position.y = y_cur;
@@ -342,14 +337,16 @@ void Quadrotor::run()
         
         do{
             if(frontiers.empty()) break;
+	    ROS_INFO("Frontier list not empty");
             geometry_msgs::Pose _goal = frontiers.front().second;
             frontiers.pop();
             explored.push_back(_goal); // Valid or not, make sure that will not be offered as candidate again.
             bool invalid = false;
             for(int i=0;i<invalid_poses.size();i++){
                 
-                if(sqrt(pow(invalid_poses[i].position.x - _goal.position.x,2) + pow(invalid_poses[i].position.y - _goal.position.y,2) 
+                if(sqrt(pow(invalid_poses[i].position.x - _goal.position.x,2) + pow(invalid_poses[i].position.y - _goal.position.y,2)
                     + pow(invalid_poses[i].position.z - _goal.position.z,2)) < 1.5){
+		    ROS_INFO("Frontier voxel is invalid: within 1.5 meters of previously explored frontier");
                     invalid = true;
                     invalid_poses.push_back(_goal);
                     break;
@@ -358,8 +355,13 @@ void Quadrotor::run()
             if(invalid) continue;
 
             success = go(_goal);
-            if(!success) invalid_poses.push_back(_goal);
+
+            if(!success){
+		    ROS_INFO("Can't go to goal.");
+		    invalid_poses.push_back(_goal);
+	    }
             else{
+		ROS_INFO("Successfully got to goal");
                 double xspan = XMAX-XMIN;
                 double yspan = YMAX-YMIN;
                 int xpatch = (_goal.position.x - XMIN)*GRID/xspan;
