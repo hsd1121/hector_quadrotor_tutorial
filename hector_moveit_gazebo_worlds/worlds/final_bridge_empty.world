@@ -74,7 +74,7 @@
         <visual name='visual'>
           <geometry>
             <mesh>
-              <uri>file:///home/klyu/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
+              <uri>file:///home/kevin/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -82,7 +82,7 @@
         <collision name='collision'>
           <geometry>
             <mesh>
-              <uri>file:///home/klyu/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
+              <uri>file:///home/kevin/catkin_ws/src/hector_quadrotor_tutorial/hector_moveit_gazebo_worlds/Media/models/bridge/meshes/Bridge.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
